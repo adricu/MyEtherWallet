@@ -1,0 +1,11 @@
+FROM alpine as builder
+ENV VERSION 5.0.4
+RUN apk add --update unzip
+WORKDIR /etherwallet
+RUN wget https://github.com/MyEtherWallet/MyEtherWallet/releases/download/v${VERSION}/MyEtherWallet-v${VERSION}.zip
+RUN unzip MyEtherWallet-v${VERSION}.zip && rm MyEtherWallet-v${VERSION}.zip
+
+FROM nginx
+COPY --from=builder /etherwallet /usr/share/nginx/html
+
+EXPOSE 80
