@@ -1,5 +1,5 @@
 FROM alpine as builder
-ENV VERSION 5.0.4
+ARG VERSION
 RUN apk add --update unzip
 WORKDIR /etherwallet
 RUN wget https://github.com/MyEtherWallet/MyEtherWallet/releases/download/v${VERSION}/MyEtherWallet-v${VERSION}.zip
