@@ -8,109 +8,110 @@
       <div class="page-container">
         <div v-show="!byJson && !byMnemonic" class="nav-tab-user-input-box">
           <b-tabs class="x100">
-            <div v-if="showProgressBar" class="progress-bar" />
+            <div v-if="showProgressBar && false" class="progress-bar" />
             <b-tab
+              :title="this.$t('common.mew-wallet.string')"
               class="mew-connect-block"
-              title="MEWconnect"
               active
               @click="showProgressBar = false"
             >
-              <div class="title-block">
-                <div class="title-popover">
-                  <h3>{{ $t('createWallet.titleMEWConnect') }}</h3>
-                  <popover :popcontent="$t('home.aboutMewConnectDesc')" />
-                </div>
-                <p>{{ $t('createWallet.mewConnectDesc') }}</p>
-              </div>
-
-              <div class="appstores">
-                <div class="icons">
-                  <a
-                    v-if="canDownloadApple"
-                    href="https://itunes.apple.com/us/app/mewconnect/id1391097156?mt=8"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <img
-                      src="~@/assets/images/icons/appstore.svg"
-                      height="40"
-                    />
-                  </a>
-                  <div v-else @click="openIpadModal">
-                    <img
-                      src="~@/assets/images/icons/appstore.svg"
-                      height="40"
+              <div class="tab-content-block">
+                <div class="title-block">
+                  <div class="title-popover">
+                    <h3>{{ $t('createWallet.mew-wallet.title') }}</h3>
+                    <popover
+                      :popcontent="$t('createWallet.mew-wallet.tooltip')"
                     />
                   </div>
-                  <a
-                    href="http://play.google.com/store/apps/details?id=com.myetherwallet.mewconnect"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <img
-                      src="~@/assets/images/icons/google-play.svg"
-                      height="40"
-                    />
-                  </a>
-                </div>
-                <div class="download">
-                  <p @click="scanToDownloadModalOpen">
-                    {{ $t('createWallet.scanToDownload') }}
+                  <h3 class="mew-wallet-desc mt-2">
+                    {{ $t('createWallet.mew-wallet.desc') }}
+                  </h3>
+                  <p class="download-txt mt-3">
+                    {{ $t('createWallet.mew-wallet.details') }}
                   </p>
                 </div>
+                <div class="appstores">
+                  <div class="icons">
+                    <a
+                      v-if="canDownloadApple"
+                      href="https://itunes.apple.com/app/id1464614025"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        alt
+                        src="~@/assets/images/icons/button-app-store.png"
+                        height="40"
+                      />
+                    </a>
+                    <div v-else @click="openIpadModal">
+                      <img
+                        alt
+                        src="~@/assets/images/icons/button-app-store.png"
+                        height="40"
+                      />
+                    </div>
+                    <a
+                      href="https://play.google.com/store/apps/details?id=com.myetherwallet.mewwallet"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        alt
+                        src="~@/assets/images/icons/button-google-play-color.png"
+                        height="40"
+                      />
+                    </a>
+                  </div>
+                </div>
+                <div class="qr-container mt-5">
+                  <qrcode :value="qrRedirectLink" :options="{ size: 150 }" />
+                </div>
               </div>
-
               <div class="bottom-image">
-                <img src="@/assets/images/etc/phones.png" />
+                <img alt src="@/assets/images/icons/snippet-mew-wallet.png" />
               </div>
             </b-tab>
             <b-tab
-              :title="$t('createWallet.byJsonFile')"
+              :title="$t('createWallet.keystore.title-tab')"
               @click="showProgressBar = true"
             >
-              <div class="title-block">
-                <div class="not-recommended">
-                  {{ $t('createWallet.notARecommendedWay') }}
-                </div>
-                <div class="title-popover">
-                  <h3>{{ $t('createWallet.yourPw') }}</h3>
-                  <popover :popcontent="$t('popover.password')" />
-                </div>
+              <div class="warning">
+                <warning-message warning-type="create" />
               </div>
-
-              <create-wallet-input
-                v-model="password"
-                :switcher="switcher"
-                :param="'Json'"
-              />
-              <create-wallet-input-footer
-                :combo="$t('createWallet.keyPass')"
-                :desc="$t('createWallet.keyPassDesc')"
-              />
+              <div class="tab-content-block">
+                <div class="title-block">
+                  <div class="title-popover">
+                    <h3>{{ $t('common.password.your') }}</h3>
+                    <popover :popcontent="$t('popover.password')" />
+                  </div>
+                </div>
+                <create-wallet-input
+                  v-model="password"
+                  :switcher="switcher"
+                  :param="'Json'"
+                />
+                <create-wallet-input-footer />
+              </div>
             </b-tab>
             <b-tab
-              :title="$t('createWallet.byMnemonic')"
+              :title="$t('createWallet.mnemonic.title-tab')"
               @click="showProgressBar = true"
             >
-              <div class="title-block">
-                <div class="not-recommended">
-                  {{ $t('createWallet.notARecommendedWay') }}
-                </div>
-                <div class="title-popover">
-                  <h3>{{ $t('createWallet.yourPw') }}</h3>
-                  <popover :popcontent="$t('popover.password')" />
-                </div>
+              <div class="warning">
+                <warning-message warning-type="create" />
               </div>
-
-              <create-wallet-input
-                v-model="password"
-                :switcher="switcher"
-                :param="'Mnemonic'"
-              />
-              <create-wallet-input-footer
-                :combo="$t('createWallet.passMnem')"
-                :desc="$t('createWallet.passMnemDesc')"
-              />
+              <div class="tab-content-block">
+                <div class="title-block">
+                  <div class="title-popover">
+                    <h3>{{ $t('createWallet.mnemonic.title') }}</h3>
+                    <popover
+                      :popcontent="$t('createWallet.mnemonic.popover')"
+                    />
+                  </div>
+                </div>
+                <by-mnemonic-container />
+              </div>
             </b-tab>
           </b-tabs>
         </div>
@@ -121,12 +122,12 @@
         <by-mnemonic-container v-if="!byJson && byMnemonic" />
       </div>
     </div>
-
     <by-json-page-footer />
   </div>
 </template>
 
 <script>
+import WarningMessage from '@/components/WarningMessage';
 import ByJsonFileContainer from './containers/ByJsonFileContainer';
 import ByMnemonicContainer from './containers/ByMnemonicContainer';
 import TutorialModal from './components/TutorialModal';
@@ -150,7 +151,8 @@ export default {
     'create-wallet-input': CreateWalletInput,
     'create-wallet-input-footer': CreateWalletInputFooter,
     'by-json-page-footer': PageFooter,
-    'ipad-modal': IpadModal
+    'ipad-modal': IpadModal,
+    'warning-message': WarningMessage
   },
   data() {
     return {
@@ -161,9 +163,16 @@ export default {
       canDownloadApple: true
     };
   },
+  computed: {
+    qrRedirectLink() {
+      return window.location.href.replace('create-wallet', 'qr-code');
+    }
+  },
   mounted() {
     this.canDownloadApple =
-      platform.product && platform.product.toLowerCase() !== 'ipad';
+      platform.product !== null
+        ? platform.product.toLowerCase() !== 'ipad'
+        : true;
     const skipTutorial = store.get('skipTutorial');
     if (
       skipTutorial === undefined ||

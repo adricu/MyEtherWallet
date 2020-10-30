@@ -1,9 +1,13 @@
 {
-  "notAValidAmountTotal": "Not enough ",
-  "toSend": "to send.",
-  "invalidValue": "Invalid value",
-  "wrongPassPhrase": "Passphrase given is incorrect!",
-  "browserNonU2f": "Browser not u2f compliant. Try using Chrome or Opera!",
-  "browserNonWebUsb": "Browser does not support WebUSB. Try using Chrome or Opera!",
-  "noMobileSupport": "Hardware wallet not supported by mobile browser!"
+  "not-valid-amount-total": "Недостаточно ",
+  "to-send": "для отправки.",
+  "invalid-value": "Неверное значение",
+  "wrong-passphrase": "Парольная фраза введена неверно!",
+  "browser-non-u2f": "Браузер не совместим с u2f. Попробуйте использовать Chrome или Opera!",
+  "browser-non-web-usb": "Браузер не поддерживает WebUSB. Попробуйте использовать Chrome или Opera!",
+  "no-mobile-support": "Аппаратный кошелек не поддерживается мобильным браузером!",
+  "something-went-wrong": "Что-то пошло не так!",
+  "signer-address-different": "Адрес подписчика отличается от полученного адреса!",
+  "high-gas-limit-warning": "Внимание: Высокая цена газa означает более высокие комиссии за транзакцию.",
+  "invalid-network-id-sig": "Возвращена неверная подпись networkId. Ожидается: {expected} , Получено: {got}"
 }

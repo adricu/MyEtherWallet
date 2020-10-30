@@ -1,6 +1,8 @@
 import { shallowMount } from '@vue/test-utils';
 import DappButtons from '@/layouts/InterfaceLayout/components/DappButtons/DappButtons.vue';
 import { Tooling } from '@@/helpers';
+import VueX from 'vuex';
+import { state, getters } from '@@/helpers/mockStore';
 
 const RouterLinkStub = {
   name: 'router-link',
@@ -24,7 +26,15 @@ describe('DappButtons.vue', () => {
     const baseSetup = Tooling.createLocalVueInstance();
     localVue = baseSetup.localVue;
     i18n = baseSetup.i18n;
-    store = baseSetup.store;
+    store = new VueX.Store({
+      modules: {
+        main: {
+          namespaced: true,
+          state,
+          getters
+        }
+      }
+    });
   });
 
   beforeEach(() => {
@@ -36,6 +46,11 @@ describe('DappButtons.vue', () => {
       propsData: { title, desc, icon, param, iconDisabled, supportedNetworks },
       stubs: { 'router-link': RouterLinkStub }
     });
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
   });
 
   it('should render correct title', () => {
@@ -50,16 +65,10 @@ describe('DappButtons.vue', () => {
     ).toEqual(desc);
   });
 
-  it('should render correct icon', () => {
+  xit('should render correct icon', () => {
     expect(
       wrapper.vm.$el.querySelector('.dapps-button img').src.trim()
     ).toEqual(icon);
-  });
-
-  it('should render correct param', () => {
-    expect(wrapper.vm.$el.querySelector('.param').textContent.trim()).toEqual(
-      param
-    );
   });
   describe('DappButtons.vue Methods', () => {});
 });

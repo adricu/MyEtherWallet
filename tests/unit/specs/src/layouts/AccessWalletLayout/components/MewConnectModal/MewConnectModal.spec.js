@@ -7,7 +7,7 @@ describe('MewConnectModal.vue', () => {
   let localVue, i18n, wrapper, store;
   window.matchMedia =
     window.matchMedia ||
-    function() {
+    function () {
       return {
         matches: false,
         addListener: jest.fn(),
@@ -43,11 +43,14 @@ describe('MewConnectModal.vue', () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
+
   it('should render correct contents', () => {
     const QrCode = 'QrCode';
     wrapper.setData({ QrCode: QrCode });
     expect(wrapper.vm.$data.QrCode).toEqual(QrCode);
   });
-
-  describe('MewConnectModal.vue Methods', () => {});
 });

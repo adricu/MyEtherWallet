@@ -1,5 +1,5 @@
-import tokens from '@/tokens/tokens-exp.json';
-import contracts from '@/contracts/contract-abi-exp.json';
+import tokens from '@/_generated/tokens/tokens-exp.json';
+import contracts from '@/_generated/contracts/contract-abi-exp.json';
 import exp from '@/assets/images/networks/exp.svg';
 
 export default {
@@ -11,5 +11,6 @@ export default {
   chainID: 2,
   tokens: tokens,
   contracts: contracts,
-  icon: exp
+  icon: exp,
+  currencyName: 'EXP'
 };

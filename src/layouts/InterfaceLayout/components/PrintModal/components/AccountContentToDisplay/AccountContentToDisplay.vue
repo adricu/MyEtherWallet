@@ -12,28 +12,36 @@
             />
           </div>
           <div class="text-container">
-            <h3>{{ header }}</h3>
-            <span> {{ subheader }} </span>
+            <h3>{{ $t('interface.account-content.header') }}</h3>
+            <span> {{ $t('interface.account-content.subheader') }} </span>
           </div>
         </div>
         <div>
-          <h4 class="left-text">
-            {{ content.text1 }} <span> {{ content.red1 }} </span>
-            {{ content.text2 }} <span> {{ content.red2 }} </span>
-            {{ content.text3 }}
-          </h4>
+          <i18n
+            tag="h4"
+            path="interface.account-content.warning"
+            class="left-text"
+          >
+            <span slot="safe">{{ $t('interface.account-content.safe') }}</span>
+            <span v-if="!!wallet && !wallet.isPubOnly" slot="extend">{{
+              $t('interface.account-content.dont-share-priv-key', {
+                doNot: $t('interface.account-content.do-not')
+              })
+            }}</span>
+          </i18n>
         </div>
         <div class="link-container">
           <p>
-            <img height="15px" src="~@/assets/images/icons/support.svg" />
-            {{ link1 }}
+            <img alt height="15px" src="~@/assets/images/icons/support.svg" />
+            {{ $t('common.support-email') }}
           </p>
           <p>
             <img
+              alt
               height="15px"
               src="~@/assets/images/icons/web-solution-white.svg"
             />
-            {{ link2 }}
+            {{ $t('interface.account-content.link2') }}
           </p>
         </div>
       </div>
@@ -41,17 +49,19 @@
         <div class="header-text">
           <b>
             <img
+              alt
               src="~@/assets/images/short-hand-logo-white.png"
               height="30px"
             />
           </b>
-          <span class="header-line" /> <span> {{ paper }} </span>
+          <span class="header-line" />
+          <span> {{ $t('interface.account-content.paper') }} </span>
         </div>
 
         <div class="qr-code-container">
           <qrcode :value="address" :options="{ size: 100 }" />
           <div class="text-container">
-            <h4>{{ myAddress }}</h4>
+            <h4 class="uppercase">{{ $t('common.my-addr') }}</h4>
             <span>
               {{ address }}
             </span>
@@ -59,20 +69,22 @@
         </div>
       </div>
       <img
+        alt
         src="~@/assets/images/background/404bg.jpg"
         width="100%"
         class="floating-img"
       />
       <img
-        src="~@/assets/images/etc/spaceman.png"
+        alt
+        src="~@/assets/images/etc/access-spaceman.png"
         width="100%"
         class="floating-spaceman"
       />
     </div>
     <div class="between">
       <div class="text">
-        <img height="15px" src="~@/assets/images/icons/scissor.svg" />
-        <p>Cut Here</p>
+        <img alt height="15px" src="~@/assets/images/icons/scissor.svg" />
+        <p>{{ $t('common.print-modal.cut') }}</p>
       </div>
       <div class="dash"></div>
     </div>
@@ -82,33 +94,36 @@
           <blockie :address="address" width="55px" height="55px" />
         </div>
         <div class="header-content">
-          <h3>{{ myAddress }}</h3>
-          <p>{{ subheader }}</p>
+          <h3 class="uppercase">{{ $t('common.my-addr') }}</h3>
+          <p>{{ $t('interface.account-content.subheader') }}</p>
         </div>
       </div>
       <div class="body-container">
-        <h3>
-          {{ content.text1 }} <span> {{ content.red1 }} </span>
-          {{ content.text2 }} <span> {{ content.red2 }} </span>
-          {{ content.text3 }}
-        </h3>
+        <i18n tag="h3" path="interface.account-content.warning">
+          <span slot="safe">{{ $t('interface.account-content.safe') }}</span>
+          <span v-if="!!wallet && !wallet.isPubOnly" slot="extend">{{
+            $t('interface.account-content.dont-share-priv-key', {
+              doNot: $t('interface.account-content.do-not')
+            })
+          }}</span>
+        </i18n>
       </div>
       <div class="my-address-container">
         <div class="text-container">
-          <h3>{{ myAddress }}</h3>
+          <h3 class="uppercase">{{ $t('common.my-addr') }}</h3>
           <p>{{ address }}</p>
         </div>
         <div class="my-address-qrcode">
           <qrcode :value="address" :options="{ size: 120 }" />
         </div>
       </div>
-      <div v-if="!wallet.isPubOnly" class="my-priv-container">
+      <div v-if="!!wallet && !wallet.isPubOnly" class="my-priv-container">
         <div class="text-container">
-          <h3>{{ myPriv }}</h3>
-          <p>{{ wallet.privateKey.toString('hex') }}</p>
+          <h3>{{ $t('interface.account-content.my-priv') }}</h3>
+          <p>{{ wallet.getPrivateKeyString() }}</p>
         </div>
         <qrcode
-          :value="wallet.privateKey.toString('hex')"
+          :value="wallet.getPrivateKeyString()"
           :options="{ size: 120 }"
         />
       </div>
@@ -116,25 +131,33 @@
     <div class="footer-container">
       <div class="link-container">
         <p>
-          <img height="17px" src="~@/assets/images/icons/support.svg" />
-          {{ link1 }}
+          <img alt height="17px" src="~@/assets/images/icons/support.svg" />
+          {{ $t('common.support-email') }}
         </p>
         <p>
-          <img height="15px" src="~@/assets/images/icons/web-solution.svg" />
-          {{ link2 }}
+          <img
+            alt
+            height="15px"
+            src="~@/assets/images/icons/web-solution.svg"
+          />
+          {{ $t('interface.account-content.link2') }}
         </p>
       </div>
       <div class="logo-container">
-        <img src="~@/assets/images/short-hand-logo.png" height="25px" />
+        <img
+          :src="require(`@/assets/images/short-hand-logo-${buildType}.png`)"
+          height="25px"
+          alt
+        />
         <p class="border-line"></p>
-        <p>{{ paper }}</p>
+        <p>{{ $t('interface.account-content.paper') }}</p>
       </div>
     </div>
   </div>
 </template>
 <script>
 import Blockie from '@/components/Blockie';
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 
 export default {
   components: {
@@ -148,29 +171,12 @@ export default {
   },
   data() {
     return {
-      header: 'MY ADDRESS ICON',
-      subheader: 'Always look for this icon when sending to this wallet',
-      mew: 'MyEtherWallet',
-      paper: 'Paper Wallet',
-      link1: 'support@myetherwallet.com',
-      link2: 'https://www.myetherwallet.com',
-      myAddress: 'MY ADDRESS',
-      myPriv: 'MY PRIVATE KEY',
-      content: {
-        text1: 'Please Keep Your Paper Wallet at a',
-        text2: 'Place! Please',
-        text3: 'Share Your Private Key With Anyone!',
-        red1: 'SAFE',
-        red2: 'DO NOT'
-      }
+      buildType: BUILD_TYPE
     };
   },
   computed: {
-    ...mapGetters({
-      wallet: 'wallet'
-    })
-  },
-  methods: {}
+    ...mapState('main', ['wallet'])
+  }
 };
 </script>
 <style lang="scss" scoped>

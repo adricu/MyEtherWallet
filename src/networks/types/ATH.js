@@ -1,5 +1,5 @@
-import tokens from '@/tokens/tokens-ath.json';
-import contracts from '@/contracts/contract-abi-ath.json';
+import tokens from '@/_generated/tokens/tokens-ath.json';
+import contracts from '@/_generated/contracts/contract-abi-ath.json';
 import ath from '@/assets/images/icons/network.svg';
 
 export default {
@@ -11,5 +11,6 @@ export default {
   chainID: 1620,
   tokens: tokens,
   contracts: contracts,
-  icon: ath
+  icon: ath,
+  currencyName: 'ATH'
 };

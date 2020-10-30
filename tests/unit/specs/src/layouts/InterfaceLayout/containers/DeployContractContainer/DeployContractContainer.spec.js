@@ -1,7 +1,5 @@
 import Vue from 'vue';
 import { shallowMount } from '@vue/test-utils';
-// import InteractWithContractContainer from '@/layouts/InterfaceLayout/containers/InteractWithContractContainer/InteractWithContractContainer.vue';
-//import InterfaceContainerTitle from '@/layouts/InterfaceLayout/components/InterfaceContainerTitle/InterfaceContainerTitle.vue';
 import DeployContractContainer from '@/layouts/InterfaceLayout/containers/DeployContractContainer/DeployContractContainer.vue';
 // import InterfaceBottomText from '@/components/InterfaceBottomText/InterfaceBottomText.vue';
 // import CurrencyPicker from '@/layouts/InterfaceLayout/components/CurrencyPicker/CurrencyPicker.vue';
@@ -9,8 +7,10 @@ import PopOver from '@/components/PopOver/PopOver.vue';
 import BackButton from '@/layouts/InterfaceLayout/components/BackButton/BackButton.vue';
 // import sinon from 'sinon';
 import { Tooling } from '@@/helpers';
+import VueX from 'vuex';
+import { state, getters } from '@@/helpers/mockStore';
 
-describe('[Needs Cleaned Up 1-16-19] InteractWithContractContainer.vue', () => {
+describe('DeployContractContainer.vue', () => {
   let localVue, i18n, wrapper, store;
   const resetView = jest.fn();
 
@@ -20,10 +20,22 @@ describe('[Needs Cleaned Up 1-16-19] InteractWithContractContainer.vue', () => {
       window.pageYOffset = valY;
     });
 
+    document.execCommand = jest.fn().mockImplementation(command => {
+      return command;
+    });
+
     const baseSetup = Tooling.createLocalVueInstance();
     localVue = baseSetup.localVue;
     i18n = baseSetup.i18n;
-    store = baseSetup.store;
+    store = new VueX.Store({
+      modules: {
+        main: {
+          namespaced: true,
+          state,
+          getters
+        }
+      }
+    });
     Vue.config.warnHandler = () => {};
   });
   beforeEach(() => {
@@ -42,6 +54,11 @@ describe('[Needs Cleaned Up 1-16-19] InteractWithContractContainer.vue', () => {
     });
     wrapper.find('div'); // added to suppress eslint warning
   });
+
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
   it('should render correct bytecode', () => {
     const bytecode = 'bytecode';
     wrapper.setData({ bytecode });
@@ -56,20 +73,6 @@ describe('[Needs Cleaned Up 1-16-19] InteractWithContractContainer.vue', () => {
     expect(wrapper.vm.$el.querySelectorAll('textarea')[1].value).toEqual(
       wrapper.vm.$data.abi
     );
-  });
-
-  xit('should render correct contractName', () => {
-    const contractName = 'contractName';
-    wrapper.setData({ contractName });
-    expect(
-      wrapper.vm.$el.querySelectorAll('.domain-name input')[0].value
-    ).toEqual(contractName);
-  });
-
-  xit('should render correct contractName placeholder', () => {
-    expect(
-      wrapper.vm.$el.querySelectorAll('.domain-name input')[0].placeholder
-    ).toEqual(wrapper.vm.$data.contractNamePlaceholder);
   });
 
   it('should render correct bytecode', () => {
@@ -102,12 +105,6 @@ describe('[Needs Cleaned Up 1-16-19] InteractWithContractContainer.vue', () => {
     ).toEqual('Name for the contract');
   });
 
-  it('should render correct value data', () => {
-    wrapper
-      .find('.submit-button-container .buttons .submit-button')
-      .trigger('click');
-  });
-
   it('should render correct validAbi', () => {
     expect(
       wrapper.vm.$el
@@ -116,7 +113,21 @@ describe('[Needs Cleaned Up 1-16-19] InteractWithContractContainer.vue', () => {
     ).toBeGreaterThan(-1);
   });
 
+  it('should clear the form', () => {
+    wrapper.setData({
+      bytecode: '0x0x0x',
+      abi: '0x0x0x',
+      contractName: 'Contract'
+    });
+    wrapper.find('.clear-all-btn').trigger('click');
+  });
+
   describe('DeployContractContainer.vue Methods', () => {
+    it('should execute `copy` command when button is clicked', () => {
+      wrapper.findAll('.title-button').at(1).trigger('click');
+      expect(document.execCommand).toHaveBeenCalled();
+    });
+
     it('should Open confirmationModal when click button', () => {
       window.pageXOffset = 100;
       window.pageYOffset = 100;

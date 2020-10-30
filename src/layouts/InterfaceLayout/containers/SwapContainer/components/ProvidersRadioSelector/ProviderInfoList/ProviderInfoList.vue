@@ -5,7 +5,7 @@
       :key="providerName + idx"
     >
       <div class="provider-image">
-        <img :src="providerLogo(providerName)" />
+        <img :src="providerLogo(providerName)" alt />
       </div>
       <div>
         <div>
@@ -18,22 +18,22 @@
 
 <script>
 import MEW from '@/assets/images/logo.png';
-import KyberNetwork from '@/assets/images/etc/kybernetwork_gray.png';
 import Bity from '@/assets/images/etc/bity_gray.png';
 import Simplex from '@/assets/images/etc/simplex_gray.png';
 import Changelly from '@/assets/images/etc/changelly_gray.png';
+import DexAg from '@/assets/images/etc/dexag_gray.svg';
 
 export default {
   props: {
     allSupportedProviders: {
       type: Array,
-      default: function() {
+      default: function () {
         return [];
       }
     },
     unavailableProviders: {
       type: Array,
-      default: function() {
+      default: function () {
         return [];
       }
     }
@@ -43,10 +43,10 @@ export default {
       otherProviderList: [],
       logos: {
         mew: MEW,
-        kybernetwork: KyberNetwork,
         bity: Bity,
         simplex: Simplex,
-        changelly: Changelly
+        changelly: Changelly,
+        dexag: DexAg
       },
       betaLogos: {}
     };
@@ -86,7 +86,7 @@ export default {
       );
     },
     getTagLine(name) {
-      return this.$t(`interface.${name}TagLine`);
+      return this.$t(`swap.tag-line.${name}`);
     }
   }
 };

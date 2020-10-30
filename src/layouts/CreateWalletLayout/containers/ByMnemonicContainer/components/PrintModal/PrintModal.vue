@@ -2,29 +2,33 @@
   <div>
     <b-modal
       ref="print"
-      title="Print Preview"
+      :title="$t('createWallet.mnemonic.print.print-title')"
       hide-footer
       centered
       class="nopadding print-mod"
       size="lg"
+      static
+      lazy
     >
       <div class="modal-content-container">
         <div ref="printContainer" class="mnemonic-to-print">
           <mnemonic-table-to-print
             :mnemonic="mnemonic"
             :is-twenty-four="isTwentyFour"
+            :build-type="buildType"
           />
         </div>
         <div class="mnemonic-to-display">
           <mnemonic-table-to-display
             :mnemonic="mnemonic"
             :is-twenty-four="isTwentyFour"
+            :build-type="buildType"
           />
         </div>
         <div class="button-container">
           <standard-button
             :options="printButtonOptions"
-            @click.native="print"
+            :click-function="print"
           />
         </div>
       </div>
@@ -38,6 +42,7 @@ import printJS from 'print-js';
 import html2canvas from 'html2canvas';
 import MnemonicTableToPrint from './components/MnemonicTableToPrint';
 import MnemonicTableToDisplay from './components/MnemonicTableToDisplay';
+import { Toast } from '@/helpers';
 
 export default {
   components: {
@@ -62,23 +67,43 @@ export default {
         buttonStyle: 'green-border',
         noMinWidth: true,
         fullWidth: true
-      }
+      },
+      buildType: BUILD_TYPE
     };
   },
   methods: {
     async print() {
-      const element = this.$refs.printContainer;
-      const screen = await html2canvas(element, {
-        async: true,
-        logging: false
-      }).then(canvas => {
-        return canvas;
-      });
-
-      printJS({
-        printable: screen.toDataURL('image/png'),
-        type: 'image'
-      });
+      try {
+        const element = this.$refs.printContainer;
+        const screen = await html2canvas(element, {
+          async: true,
+          logging: false,
+          height: 800,
+          width: 800,
+          scrollY: 0
+        });
+        if (screen && screen.toDataURL !== '') {
+          printJS({
+            printable: screen.toDataURL('image/png'),
+            type: 'image'
+          }).onError(() => {
+            Toast.responseHandler(
+              this.$t('errorsGlobal.print-support-error'),
+              Toast.ERROR
+            );
+          });
+        } else {
+          Toast.responseHandler(
+            this.$t('errorsGlobal.print-support-error'),
+            Toast.ERROR
+          );
+        }
+      } catch (e) {
+        Toast.responseHandler(
+          this.$t('errorsGlobal.print-support-error'),
+          Toast.ERROR
+        );
+      }
     }
   }
 };

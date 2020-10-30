@@ -2,14 +2,16 @@
   <div class="modal-container">
     <b-modal
       ref="swapconfirmation"
+      :title="$t('swap.review')"
       hide-footer
       centered
       class="bootstrap-modal bootstrap-modal-wide padding-40-20"
-      title="Confirmation"
+      static
+      lazy
     >
       <div class="time-remaining">
         <h1>{{ timeRemaining }}</h1>
-        <p>{{ $t('interface.timeRemaining') }}</p>
+        <p>{{ $t('swap.time-remain') }}</p>
       </div>
       <div>
         <div class="swap-detail">
@@ -18,13 +20,14 @@
               <i :class="['cc', fromAddress.name, 'cc-icon']" />
             </div>
             <p class="value">
-              {{ fromAddress.value }} <span>{{ fromAddress.name }}</span>
+              {{ fromAddress.value }}
+              <span>{{ fromAddress.name }}</span>
             </p>
             <p
               v-show="fromAddress.address !== '' && !isFromFiat"
               class="block-title"
             >
-              {{ $t('interface.fromAddr') }}
+              {{ $t('sendTx.from-addr') }}
             </p>
             <p
               v-show="fromAddress.address !== '' && !isFromFiat"
@@ -33,17 +36,20 @@
               {{ fromAddress.address }}
             </p>
           </div>
-          <div class="right-arrow"><img :src="arrowImage" /></div>
+          <div class="right-arrow">
+            <img :src="arrowImage" alt />
+          </div>
           <!-- Fiat to Crypto-->
           <div v-if="!toFiat" class="to-address">
             <div class="icon">
               <i :class="['cc', toAddress.name, 'cc-icon']" />
             </div>
             <p class="value">
-              {{ toAddress.value }} <span>{{ toAddress.name }}</span>
+              {{ toAddress.value }}
+              <span>{{ toAddress.name }}</span>
             </p>
             <p v-show="toAddress.address !== ''" class="block-title">
-              {{ $t('interface.sendTxToAddr') }}
+              {{ $t('sendTx.to-addr') }}
             </p>
             <p v-show="toAddress.address !== ''" class="address">
               {{ toAddress.address }}
@@ -55,19 +61,19 @@
               <i :class="['cc', toAddress.name, 'cc-icon']" />
             </div>
             <p class="value">
-              {{ toAddress.value }} <span>{{ toAddress.name }}</span>
+              {{ toAddress.value }}
+              <span>{{ toAddress.name }}</span>
             </p>
             <p class="block-title">{{ $t('common.to') }}</p>
             <p class="address">{{ fiatDest }}</p>
           </div>
         </div>
-
         <ul v-show="!isFromFiat" class="confirm-send-button">
           <li>
             <div class="provider-address-details">
               <h4>
                 {{
-                  $t('interface.notFromEthSwap', {
+                  $t('swap.send-value-curr', {
                     value: fromAddress.value,
                     currency: fromAddress.name
                   })
@@ -87,7 +93,7 @@
               <button-with-qrcode
                 :qrcode="qrcode"
                 :buttonname="
-                  $t('interface.sentCoins', { currency: fromAddress.name })
+                  $t('swap.sent-my-coins', { currency: fromAddress.name })
                 "
               />
             </div>
@@ -95,7 +101,8 @@
         </ul>
         <simplex-checkout-form
           v-if="isFromFiat && swapProvider === 'simplex'"
-          :form-data="swapDetails.dataForInitialization"
+          :swap-details="swapDetails"
+          :swap="swap"
           :continue-action="redirectToPartner"
         />
       </div>
@@ -110,7 +117,7 @@ import Arrow from '@/assets/images/etc/single-arrow.svg';
 import ButtonWithQrCode from '@/components/Buttons/ButtonWithQrCode';
 import HelpCenterButton from '@/components/Buttons/HelpCenterButton';
 import CheckoutForm from '../CheckoutForm';
-
+import { mapActions } from 'vuex';
 import { fiat, utils, qrcodeBuilder } from '@/partners';
 
 export default {
@@ -122,7 +129,13 @@ export default {
   props: {
     swapDetails: {
       type: Object,
-      default: function() {
+      default: function () {
+        return {};
+      }
+    },
+    swap: {
+      type: Object,
+      default: function () {
         return {};
       }
     },
@@ -155,7 +168,7 @@ export default {
     },
     fiatDest() {
       if (this.swapDetails.orderDetails) {
-        return this.swapDetails.orderDetails.output.owner.name;
+        return this.swapDetails.orderDetails.name;
       }
       return '';
     },
@@ -166,6 +179,7 @@ export default {
           this.swapDetails.fromCurrency
         );
       }
+      return null;
     }
   },
   watch: {
@@ -190,7 +204,11 @@ export default {
         this.fromAddress = {
           value: newValue.fromValue,
           name: newValue.fromCurrency,
-          address: newValue.fromAddress ? newValue.fromAddress : ''
+          address: newValue.fromAddress
+            ? newValue.refundAddress
+              ? newValue.refundAddress
+              : newValue.fromAddress
+            : ''
         };
         this.toAddress = {
           value: newValue.toValue,
@@ -201,6 +219,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions('main', ['addSwapNotification']),
     timeUpdater(swapDetails) {
       clearInterval(this.timerInterval);
       this.timeRemaining = utils.getTimeRemainingString(
@@ -217,16 +236,14 @@ export default {
         }
       }, 1000);
     },
-    redirectToPartner() {
-      this.$store
-        .dispatch('addSwapNotification', [
-          `Swap_Order`,
-          this.currentAddress,
-          this.swapDetails
-        ])
-        .then(() => {
-          this.$refs.swapconfirmation.hide();
-        });
+    redirectToPartner(swapDetails) {
+      this.addSwapNotification([
+        `Swap_Order`,
+        this.currentAddress,
+        swapDetails
+      ]).then(() => {
+        this.$refs.swapconfirmation.hide();
+      });
     },
     swapStarted(swapDetails) {
       this.timeUpdater(swapDetails);
@@ -236,15 +253,13 @@ export default {
       }
     },
     sentTransaction() {
-      this.$store
-        .dispatch('addSwapNotification', [
-          `Swap_Order`,
-          this.currentAddress,
-          this.swapDetails
-        ])
-        .then(() => {
-          this.$refs.swapconfirmation.hide();
-        });
+      this.addSwapNotification([
+        `Swap_Order`,
+        this.currentAddress,
+        this.swapDetails
+      ]).then(() => {
+        this.$refs.swapconfirmation.hide();
+      });
     }
   }
 };

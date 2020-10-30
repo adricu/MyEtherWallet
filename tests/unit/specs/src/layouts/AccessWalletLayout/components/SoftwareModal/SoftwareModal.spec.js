@@ -3,6 +3,7 @@ import SoftwareModal from '@/layouts/AccessWalletLayout/components/SoftwareModal
 import sinon from 'sinon';
 import { Tooling } from '@@/helpers';
 import { RouterLinkStub } from '@@/helpers/setupTooling';
+import Vue from 'vue';
 
 const BModalStub = {
   name: 'b-modal',
@@ -16,6 +17,8 @@ const BBtnStub = {
   props: ['to']
 };
 
+jest.mock('platform');
+
 describe('SoftwareModal.vue', () => {
   const openMnemonicPhraseInput = sinon.stub();
   const openPrivateKeyInput = sinon.stub();
@@ -27,6 +30,7 @@ describe('SoftwareModal.vue', () => {
       localVue = baseSetup.localVue;
       i18n = baseSetup.i18n;
       store = baseSetup.store;
+      Vue.config.warnHandler = () => {};
     });
 
     beforeEach(() => {
@@ -41,6 +45,11 @@ describe('SoftwareModal.vue', () => {
           'b-modal': BModalStub
         }
       });
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+      wrapper = null;
     });
 
     xit('should render correct contents', () => {
@@ -94,14 +103,13 @@ describe('SoftwareModal.vue', () => {
 
     it('should trigger openMnemonicPhraseInput method when continueAccess button is clicked', () => {
       wrapper.setData({ selected: 'byMnem' });
-      const btn = wrapper.find('.mid-round-button-green-filled');
-      btn.trigger('click');
+      wrapper.vm.continueAccess();
       expect(openMnemonicPhraseInput.called).toBe(true);
     });
 
     it('should trigger openPrivateKeyInput method when continueAccess button is clicked', () => {
       wrapper.setData({ selected: 'byPriv' });
-      wrapper.find('.mid-round-button-green-filled').trigger('click');
+      wrapper.vm.continueAccess();
       expect(openPrivateKeyInput.called).toBe(true);
     });
   });

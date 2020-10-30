@@ -1,10 +1,14 @@
 {
-  "popupClosed": "Popup Closed",
-  "deviceDisconnect": "Device disconnected",
-  "deviceDisconnectAction": "device disconnected during action",
-  "userCancelledAction": "Action cancelled by user",
-  "noPermission": "Permissions not granted",
-  "callInProgress": "Device call in progress",
-  "transportMissing": "Transport is missing",
-  "cancelled": "Event cancelled by user"
+  "popup-closed": "Всплывающее окно закрыто",
+  "device-disconnect": "Устройство отключено",
+  "device-disconnect-action": "устройство отключилось во время действия",
+  "user-cancelled-action": "Операция отменена пользователем",
+  "no-permission": "Разрешение не предоставлено",
+  "call-in-progress": "Выполняется вызов устройства",
+  "transport-missing": "Транспорт отсутствует",
+  "cancelled": "Операция отменена пользователем",
+  "turn-on-contract-data": "Пожалуйста, включите контрактные данные в настройках приложения Ethereum",
+  "iframe-timeout": "Убедитесь, что вы включили всплывающие окна в браузере и что блокировщик рекламы не блокирует всплывающее окно",
+  "unsupported-browser": "Браузер не поддерживается! Попробуйте использовать Trezor в Chrome или Firefox!",
+  "popup-failed-to-open": "Не удалось открыть всплывающее окно. Убедитесь, что вы включили всплывающие окна в браузере и что ваш блокировщик рекламы не блокирует всплывающее окно"
 }

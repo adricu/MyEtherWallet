@@ -19,29 +19,40 @@
       </div>
       <div class="block-content">
         <div class="information-container">
-          <h2>{{ $t('common.address') }}</h2>
+          <h2>{{ $t('common.addr') }}</h2>
           <p class="address">{{ address }}</p>
         </div>
         <div class="icon-container">
           <button
             v-if="hasMultipleAddr"
-            id="popover-ref-address"
+            id="popover-ref-switch"
             class="change-button"
             @click="switchAddr"
           >
-            Switch
+            {{ $t('interface.addr.button-switch') }}
           </button>
           <b-btn id="popover-ref-qrcode" class="custom-tooltip" @click="qrcode">
-            <img src="~@/assets/images/icons/qr-code-white.svg" />
+            <img alt src="~@/assets/images/icons/qr-code-white.svg" />
           </b-btn>
           <b-btn id="popover-ref-print" class="custom-tooltip" @click="print">
-            <img src="~@/assets/images/icons/printer-white.svg" />
+            <img alt src="~@/assets/images/icons/printer-white.svg" />
           </b-btn>
           <b-btn id="popover-ref-copy" class="custom-tooltip" @click="copy">
-            <img src="~@/assets/images/icons/copy.svg" />
+            <img alt src="~@/assets/images/icons/copy.svg" />
+          </b-btn>
+          <b-btn
+            v-show="displayAddr"
+            id="popover-ref-address"
+            class="custom-tooltip button-address"
+            @click="displayAddr"
+          >
+            <img
+              alt
+              src="~@/assets/images/icons/Interface/Buttons/Address.svg"
+            />
           </b-btn>
           <b-popover
-            content="Switch Address"
+            :content="$t('popover.addr-switch')"
             target="popover-ref-address"
             placement="top"
             triggers="hover"
@@ -55,21 +66,28 @@
             title
           />
           <b-popover
-            :content="$t('popover.copy')"
+            :content="$t('common.copy')"
             target="popover-ref-copy"
             placement="top"
             triggers="hover"
             title
           />
           <b-popover
-            :content="$t('popover.switchAddress')"
-            target="switch"
+            :content="$t('popover.addr-switch')"
+            target="popover-ref-switch"
             placement="top"
             triggers="hover"
             title
           />
           <b-popover
-            content="Address in Qrcode"
+            :content="$t('popover.addr-display')"
+            target="popover-ref-address"
+            placement="top"
+            triggers="hover"
+            title
+          />
+          <b-popover
+            :content="$t('popover.addr-qr')"
             target="popover-ref-qrcode"
             placement="top"
             triggers="hover"
@@ -83,7 +101,7 @@
 
 <script>
 import Blockie from '@/components/Blockie';
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 import { Toast } from '@/helpers';
 import {
   KEYSTORE,
@@ -103,15 +121,19 @@ export default {
     },
     print: {
       type: Function,
-      default: function() {}
+      default: function () {}
     },
     switchAddr: {
       type: Function,
-      default: function() {}
+      default: function () {}
+    },
+    displayAddr: {
+      type: Function,
+      default: undefined
     },
     qrcode: {
       type: Function,
-      default: function() {}
+      default: function () {}
     }
   },
   data() {
@@ -120,9 +142,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({
-      account: 'account'
-    })
+    ...mapState('main', ['account'])
   },
   mounted() {
     if (this.account.address !== null) {
@@ -142,7 +162,7 @@ export default {
     copy() {
       this.$refs.copyAddress.select();
       document.execCommand('copy');
-      Toast.responseHandler('Copied!', Toast.INFO);
+      Toast.responseHandler(this.$t('common.copied'), Toast.INFO);
     }
   }
 };

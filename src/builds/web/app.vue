@@ -1,10 +1,16 @@
 <template>
   <div id="app">
     <logout-warning-modal ref="logoutWarningModal" />
-    <header-container v-show="$route.fullPath !== '/getting-started'" />
+    <header-container
+      v-show="
+        $route.fullPath !== '/getting-started' &&
+        !$route.fullPath.includes('/dapp-submission')
+      "
+    />
     <welcome-modal ref="welcome" />
     <router-view />
     <footer-container />
+    <wallet-launched-footer-banner />
     <confirmation-container v-if="wallet !== null" />
   </div>
 </template>
@@ -15,9 +21,10 @@ import HeaderContainer from '@/containers/HeaderContainer';
 import ConfirmationContainer from '@/containers/ConfirmationContainer';
 import WelcomeModal from '@/components/WelcomeModal';
 import store from 'store';
-import { mapGetters } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import { Toast } from '@/helpers';
 import LogoutWarningModal from '@/components/LogoutWarningModal';
+import WalletLaunchedBanner from '@/components/WalletLaunchedBanner';
 
 export default {
   name: 'App',
@@ -26,39 +33,42 @@ export default {
     'footer-container': FooterContainer,
     'confirmation-container': ConfirmationContainer,
     'logout-warning-modal': LogoutWarningModal,
-    'welcome-modal': WelcomeModal
+    'welcome-modal': WelcomeModal,
+    'wallet-launched-footer-banner': WalletLaunchedBanner
   },
   computed: {
-    ...mapGetters({
-      wallet: 'wallet'
-    })
+    ...mapState('main', ['wallet', 'online'])
   },
   watch: {
     $route(to, from) {
       if (
-        from.matched.length &&
-        from.matched[0].path === '/interface' &&
-        to.matched[0].path !== '/interface' &&
-        this.wallet != null
+        !from.meta.hasOwnProperty('requiresAuth') &&
+        to.meta.hasOwnProperty('requiresAuth') &&
+        this.wallet !== null
       ) {
-        // Show logout warning modal
         this.$refs.logoutWarningModal.$refs.logoutWarningModal.show();
       }
     }
   },
   created() {
-    const succMsg =
-      'New update found! Please refresh your browser to receive the most updated version';
-    const errMsg = 'Something went wrong with our service workers!';
+    const succMsg = this.$t('common.updates.new');
+    const errMsg = this.$t('common.updates.update-error');
+
     window.addEventListener('PWA_UPDATED', () => {
       Toast.responseHandler(succMsg, Toast.SUCCESS);
     });
     window.addEventListener('PWA_MOUNT_ERROR', () => {
       Toast.responseHandler(errMsg, Toast.WARN);
     });
+    window.addEventListener('online', () => {
+      this.checkIfOnline(true);
+    });
+    window.addEventListener('offline', () => {
+      this.checkIfOnline(false);
+    });
   },
   mounted() {
-    this.$store.dispatch('checkIfOnline');
+    this.checkIfOnline(navigator.onLine);
     if (!store.get('notFirstTimeVisit') && this.$route.fullPath === '/') {
       this.$refs.welcome.$refs.welcome.show();
     }
@@ -66,9 +76,18 @@ export default {
     this.$refs.welcome.$refs.welcome.$on('hidden', () => {
       store.set('notFirstTimeVisit', true);
     });
+
+    this.$refs.logoutWarningModal.$refs.logoutWarningModal.$on('hidden', () => {
+      window.scrollTo(0, 0);
+    });
   },
   destroyed() {
     window.removeEventListener('PWA_UPDATED');
+    window.removeEventListener('offline');
+    window.removeEventListener('online');
+  },
+  methods: {
+    ...mapActions('main', ['checkIfOnline'])
   }
 };
 </script>

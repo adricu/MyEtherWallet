@@ -1,14 +1,25 @@
-<template>
+<template functional>
   <button
-    :class="[disabled ? 'disabled' : '', 'button-block', classname]"
-    @click="func"
+    :class="[props.disabled ? 'disabled' : '', 'button-block', props.classname]"
+    @click="props.func"
   >
     <div class="button-image">
-      <img :src="disabled ? imgDisabled : img" class="icon" />
+      <img
+        :src="props.disabled ? props.imgDisabled : props.img"
+        alt
+        class="icon"
+      />
     </div>
-    <h3>{{ title }}</h3>
-    <p class="desc">{{ desc }}</p>
-    <p :v-if="recommend !== ''" class="small-note">{{ recommend }}</p>
+    <h3>{{ props.title }}</h3>
+    <p v-if="props.hasOtherExamples === true" class="access-wallet-or">
+      - {{ parent.$t('accessWallet.access-wallet-or') }} -
+    </p>
+    <p class="desc">
+      {{ parent.$t(props.desc) }}
+    </p>
+    <p :v-if="props.recommend !== ''" class="small-note">
+      {{ props.recommend }}
+    </p>
   </button>
 </template>
 
@@ -17,7 +28,7 @@ export default {
   props: {
     func: {
       type: Function,
-      default: function() {}
+      default: function () {}
     },
     img: {
       type: String,
@@ -39,10 +50,6 @@ export default {
       type: String,
       default: ''
     },
-    tooltip: {
-      type: String,
-      default: ''
-    },
     disabled: {
       type: Boolean,
       default: true
@@ -50,10 +57,11 @@ export default {
     classname: {
       type: String,
       default: ''
+    },
+    hasOtherExamples: {
+      type: Boolean,
+      default: false
     }
-  },
-  data() {
-    return {};
   }
 };
 </script>

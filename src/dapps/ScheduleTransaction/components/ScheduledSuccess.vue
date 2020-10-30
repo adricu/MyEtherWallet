@@ -1,15 +1,18 @@
 <template>
   <div class="scheduled-success-container">
     <h3 class="page-title">
-      {{ isTokenTransfer && approved ? 'Approved' : 'Scheduled' }}
+      {{
+        isTokenTransfer && approved
+          ? $t('scheduleTx.approved')
+          : $t('scheduleTx.scheduled')
+      }}
     </h3>
 
     <div class="page-container">
       <div class="break-word">
-        Your TX has been scheduled with the transaction hash
-        <scheduled-transaction-explorer-link :tx-hash="txHash" />{{
-          !mined ? ' and is waiting to be mined' : ''
-        }}.
+        <i18n :path="getPathMined" tag="span">
+          <scheduled-transaction-explorer-link slot="hash" :tx-hash="txHash" />
+        </i18n>
       </div>
 
       <b-alert
@@ -18,31 +21,34 @@
         class="m-5 horizontal-center"
       >
         <div v-if="!mined">
-          <div>
-            Please wait for the transaction to be mined before approving...
-          </div>
+          <div>{{ $t('scheduleTx.wait-for-mined') }}</div>
           <div class="fa-3x">
             <i class="fa fa-spinner fa-spin fa-lg" />
           </div>
           <div>
-            <strong>Note:</strong> If this is taking too long, follow
-            <scheduled-transaction-explorer-link
-              :tx-hash="txHash"
-              :link-text="'this'"
-            />
-            link to approve the transaction.
+            <strong>{{ $t('scheduleTx.note.string') }}</strong>
+            <i18n path="scheduleTx.note.approve-tx" tag="span">
+              <scheduled-transaction-explorer-link
+                slot="this"
+                :tx-hash="txHash"
+                :link-text="$t('scheduleTx.note.this')"
+              />
+            </i18n>
           </div>
         </div>
         <div v-if="mined">
           <div>
-            The transaction has been mined. Please
-            <strong>approve</strong> the token transfer now.
+            <i18n path="scheduleTx.approve.desc" tag="span">
+              <strong slot="approve">{{
+                $t('scheduleTx.approve.string')
+              }}</strong>
+            </i18n>
           </div>
           <div
             class="submit-button large-round-button-green-filled mt-3"
             @click="approveToken()"
           >
-            Approve Token Transfer
+            {{ $t('scheduleTx.approve.token-transfer') }}
           </div>
         </div>
       </b-alert>
@@ -51,8 +57,8 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import EthTx from 'ethereumjs-tx';
+import { mapState } from 'vuex';
+import { Transaction } from 'ethereumjs-tx';
 import BigNumber from 'bignumber.js';
 import { Util } from '@ethereum-alarm-clock/lib';
 
@@ -97,7 +103,18 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['notifications', 'web3', 'account', 'gasPrice'])
+    ...mapState('main', [
+      'notifications',
+      'web3',
+      'account',
+      'gasPrice',
+      'network'
+    ]),
+    getPathMined() {
+      return !this.mined
+        ? 'scheduleTx.tx-scheduled-hash[1]'
+        : 'scheduleTx.tx-scheduled-hash[0]';
+    }
   },
   watch: {
     async notifications() {
@@ -192,8 +209,7 @@ export default {
         scheduledTokensApproveTransaction
       );
       scheduledTokensApproveTransaction.gasLimit = estimatedGasLimit + 1000000;
-
-      const approveTx = new EthTx(scheduledTokensApproveTransaction);
+      const approveTx = new Transaction(scheduledTokensApproveTransaction);
 
       const json = approveTx.toJSON(true);
       json.from = coinbase;

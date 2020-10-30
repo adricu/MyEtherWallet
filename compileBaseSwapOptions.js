@@ -1,13 +1,13 @@
-// NOTE: this is a temporary solution.  This operation will be moved to runtime in the future. Currently it relies on manually updated files.
 const fs = require('fs');
-const uuid = require('uuid/v4');
+const { v4: v4 } = require('uuid');
 
 const fetch = require('node-fetch');
 const web3 = require('web3');
+const defaultEthTokens = require('./src/_generated/tokens/tokens-eth.json');
 
-const swapConfigFolder = './src/partners/partnersConfig';
-const changellyConfigFolder = './src/partners/changelly/config';
-const kyberConfigFolder = './src/partners/kyber/config';
+const swapConfigFolder = './src/_generated/partners';
+const changellyConfigFolder = './src/_generated/partners';
+const kyberConfigFolder = './src/_generated/partners';
 
 const explicitStringReplacements = {
   RLC: {
@@ -27,15 +27,41 @@ class CompileSwapOptions {
   async getDecimals(address) {
     try {
       return await new this.web3.eth.Contract(
-        ERC20(),
+        [
+          {
+            constant: true,
+            inputs: [],
+            name: 'decimals',
+            outputs: [
+              {
+                name: '',
+                type: 'uint8'
+              }
+            ],
+            payable: false,
+            stateMutability: 'view',
+            type: 'function'
+          }
+        ],
         address.contractAddress
       ).methods
         .decimals()
         .call();
     } catch (e) {
+      try {
+        const tokenFound = defaultEthTokens.find(
+          token =>
+            token.address.toLowerCase() == address.contractAddress.toLowerCase()
+        );
+        if (tokenFound) {
+          return tokenFound.decimals;
+        }
+      } catch (e) {
+        console.error(e);
+      }
       console.error(e);
-      return {};
     }
+    return {};
   }
 
   async post(url = ``, data = {}, opts = {}) {
@@ -73,7 +99,7 @@ class CompileSwapOptions {
       jsonrpc: '2.0',
       method: method,
       params: data,
-      id: uuid()
+      id: v4()
     };
   }
 
@@ -94,13 +120,13 @@ class CompileSwapOptions {
           const symbol = tokenList[i].symbol.toUpperCase();
           tokenDetails[symbol] = {
             symbol: tokenList[i].symbol,
-            name: tokenList[i].name,
+            name: tokenList[i].name.trim(),
             decimals: tokenList[i].decimals,
             contractAddress: tokenList[i].contractAddress
           };
           this.kyberBaseOptions[symbol] = {
             symbol: tokenList[i].symbol,
-            name: tokenList[i].name,
+            name: tokenList[i].name.trim(),
             decimals: tokenList[i].decimals,
             contractAddress: tokenList[i].contractAddress
           };
@@ -111,6 +137,46 @@ class CompileSwapOptions {
       return {
         ETH: tokenDetails,
         other: {}
+      };
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async getDexAgSupported(    priorCollected = {
+    ETH: {},
+    other: {}
+  }) {
+    try {
+      const tokenList = await this.post(
+        'https://swap.mewapi.io/dexag',
+        {
+          jsonrpc: '2.0',
+          method: 'getSupportedCurrencies',
+          params: {},
+          id: v4()
+        }
+      );
+      const tokenDetails = priorCollected.ETH;
+      for (let i = 0; i < tokenList.length; i++) {
+        if(!tokenDetails[tokenList[i].symbol] && tokenList[i].address){
+          this.needDecimalCheck.push({
+            symbol: tokenList[i].symbol.toUpperCase(),
+            contractAddress: tokenList[i].address
+          });
+          const symbol = tokenList[i].symbol.toUpperCase();
+          tokenDetails[symbol] = {
+            symbol: tokenList[i].symbol,
+            name: tokenList[i].name.trim(),
+            decimals: 18,
+            contractAddress: tokenList[i].address
+          };
+        }
+      }
+
+      return {
+        ETH: tokenDetails,
+        other: priorCollected.other
       };
     } catch (e) {
       console.error(e);
@@ -134,7 +200,7 @@ class CompileSwapOptions {
 
     if (match === null) {
       return {
-        name: item.fullName,
+        name: item.fullName.trim(),
         symbol: item.name.toUpperCase(),
         contractAddress: item.addressUrl,
         decimals: decimals,
@@ -148,7 +214,7 @@ class CompileSwapOptions {
         });
       }
       return {
-        name: item.fullName,
+        name: item.fullName.trim(),
         symbol: item.name.toUpperCase(),
         contractAddress: match[0],
         decimals: decimals,
@@ -174,7 +240,7 @@ class CompileSwapOptions {
       if (!currentValue.extraIdName) {
         accumulator.other[currentValue.name.toUpperCase()] = {
           symbol: currentValue.name.toUpperCase(),
-          name: currentValue.fullName,
+          name: currentValue.fullName.trim(),
           addressLookup: currentValue.addressUrl
             ? currentValue.addressUrl.replace('%1$s', '[[address]]')
             : currentValue.addressUrl,
@@ -237,7 +303,7 @@ class CompileSwapOptions {
     for (let prop in options) {
       this.changellyBaseOptions[prop] = {
         symbol: prop,
-        name: options[prop].name,
+        name: options[prop].name.trim(),
         fixRateEnabled: options[prop].fixRateEnabled
       };
     }
@@ -246,44 +312,65 @@ class CompileSwapOptions {
   async run() {
     const kyberTokens = await this.getKyberSupported();
     const withChangelly = await this.supplyChangellySupported(kyberTokens);
+    const allTokens = await this.getDexAgSupported(withChangelly);
 
     for (let i = 0; i < this.needDecimalCheck.length; i++) {
       const decimals = await this.getDecimals(this.needDecimalCheck[i]);
       if (withChangelly.ETH[this.needDecimalCheck[i].symbol] && decimals) {
         withChangelly.ETH[this.needDecimalCheck[i].symbol].decimals = +decimals;
+        if(allTokens.ETH[this.needDecimalCheck[i].symbol]){
+          allTokens.ETH[this.needDecimalCheck[i].symbol].decimals = +decimals;
+        }
+      } else if (allTokens.ETH[this.needDecimalCheck[i].symbol] && decimals) {
+        allTokens.ETH[this.needDecimalCheck[i].symbol].decimals = +decimals;
       }
     }
 
     if (Object.keys(withChangelly.other).length > 0) {
+      if (!fs.existsSync(swapConfigFolder)) {
+        fs.mkdirSync(swapConfigFolder);
+      }
       fs.writeFileSync(
-        `${swapConfigFolder}/OtherCoins.js`,
-        `export default ${JSON.stringify(withChangelly.other)} `
+        `${swapConfigFolder}/OtherCoins.json`,
+        JSON.stringify(withChangelly.other)
       );
     }
 
     if (Object.keys(withChangelly.ETH).length > 0) {
+      if (!fs.existsSync(swapConfigFolder)) {
+        fs.mkdirSync(swapConfigFolder);
+      }
       fs.writeFileSync(
-        `${swapConfigFolder}/EthereumTokens.js`,
-        `export default ${JSON.stringify(withChangelly.ETH)} `
+        `${swapConfigFolder}/EthereumTokens.json`,
+        JSON.stringify(allTokens.ETH)
       );
     }
     if (Object.keys(this.changellyBaseOptions).length > 0) {
+      if (!fs.existsSync(changellyConfigFolder)) {
+        fs.mkdirSync(changellyConfigFolder);
+      }
       fs.writeFileSync(
-        `${changellyConfigFolder}/currencies.js`,
-        `const ChangellyCurrencies = ${JSON.stringify(
-          this.changellyBaseOptions
-        )}; \nexport { ChangellyCurrencies };\n`
+        `${changellyConfigFolder}/currencies.json`,
+        JSON.stringify(this.changellyBaseOptions)
       );
     }
 
     if (Object.keys(this.kyberBaseOptions).length > 0) {
+      this.kyberBaseOptions['THISISADUMMYTOKEN'] = {
+        symbol: 'THISISADUMMYTOKEN',
+        name: 'For tests',
+        decimals: 18,
+        contractAddress: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+      };
+      if (!fs.existsSync(kyberConfigFolder)) {
+        fs.mkdirSync(kyberConfigFolder);
+      }
       fs.writeFileSync(
-        `${kyberConfigFolder}/currenciesETH.js`,
-        `const KyberCurrenciesETH = ${JSON.stringify(
-          this.kyberBaseOptions
-        )}; \nexport { KyberCurrenciesETH };\n`
+        `${kyberConfigFolder}/currenciesETH.json`,
+        JSON.stringify(this.kyberBaseOptions)
       );
     }
+    console.log('Complete');
   }
 }
 

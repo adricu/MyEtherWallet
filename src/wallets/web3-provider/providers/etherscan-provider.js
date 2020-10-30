@@ -8,13 +8,16 @@ import {
   ethAccounts,
   ethCoinbase,
   netVersion,
-  ethGetTransactionReceipt
+  ethGetBlockByNumber,
+  ethGetTransactionReceipt,
+  ethGetBlockNumber
 } from '../methods';
 import EtherscanProxy from '../etherscan-proxy';
 class EtherscanProvider {
   constructor(host, options, store, eventHub) {
     this.host = host;
-    this.apikey = options.apikey || 'DSH5B24BQYKD1AD8KUCDY3SAQSS6ZAU175';
+    this.apikey = options.apikey || 'UDJW3ARXWN9EHMTFUA2FW4V1KA7QZGAGCB';
+    options.apikey = this.apikey;
     this.store = store;
     this.eventHub = eventHub;
     this.proxy = new EtherscanProxy(this.host, this.apikey);
@@ -59,6 +62,8 @@ class EtherscanProvider {
     middleware.use(ethAccounts);
     middleware.use(ethGetTransactionCount);
     middleware.use(ethCoinbase);
+    middleware.use(ethGetBlockByNumber);
+    middleware.use(ethGetBlockNumber);
     middleware.use(netVersion);
     middleware.use(async ({ payload }, res) => {
       this.proxy

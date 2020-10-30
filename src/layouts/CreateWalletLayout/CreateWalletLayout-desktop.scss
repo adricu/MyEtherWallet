@@ -41,6 +41,8 @@
         img {
           height: 40px;
           margin: 0 3px;
+          overflow: hidden;
+          border-radius: 7px;
         }
       }
 
@@ -63,6 +65,11 @@
     }
   }
 
+  .tab-content-block {
+    //min-height: 500px;
+    padding: 50px;
+  }
+
   .nav-tab-user-input-box {
     background-color: $background-color-white;
     margin: 0 auto;
@@ -81,11 +88,6 @@
         width: 23.33%;
       }
     }
-
-    .tab-pane {
-      min-height: 500px;
-      padding: 50px;
-    }
   }
 
   .nav-item {
@@ -94,5 +96,18 @@
 
   .popover-container {
     margin-left: 5px;
+  }
+
+  .download-txt {
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .mew-wallet-desc {
+    text-align: center;
+  }
+
+  .qr-container {
+    text-align: center;
   }
 } // @media all and (min-width: calc(#{$tablet-width} + 1px))

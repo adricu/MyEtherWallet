@@ -3,34 +3,40 @@
     <div class="wrap">
       <div class="dropdown-button" @click="dropdownOpen">
         <p v-if="chosenValue !== ''">{{ chosenValue }}</p>
-        <p v-if="chosenValue === ''" class="placeholder">{{ placeholder }}</p>
+        <p v-if="chosenValue === ''" class="placeholder">
+          {{ inputPlaceholder }}
+        </p>
         <i aria-hidden="true" class="fa fa-angle-down"></i>
       </div>
       <div v-if="open">
-        <div class="dropdown-search-container">
-          <input v-model="search" :placeholder="$t('interface.search')" />
-          <i class="fa fa-search" />
+        <div class="dropdown-list">
+          <div class="dropdown-search-container">
+            <input v-model="search" :placeholder="$t('common.search')" />
+            <i class="fa fa-search" />
+          </div>
+          <ul>
+            <li
+              v-for="(entry, idx) in localOptions"
+              :key="idx"
+              @click="setSelected(entry)"
+            >
+              {{ displayName(entry) }}
+            </li>
+          </ul>
         </div>
-        <ul class="dropdown-list">
-          <li
-            v-for="(entry, idx) in localOptions"
-            :key="idx"
-            @click="setSelected(entry)"
-          >
-            {{ displayName(entry) }}
-          </li>
-        </ul>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import moment from 'moment';
+
 export default {
   props: {
     options: {
       type: Array,
-      default: function() {
+      default: function () {
         return [];
       }
     },
@@ -45,6 +51,10 @@ export default {
     optionValueKey: {
       type: String,
       default: ''
+    },
+    clearTimezone: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -52,7 +62,8 @@ export default {
       chosenValue: '',
       open: false,
       search: '',
-      localOptions: this.options
+      localOptions: this.options,
+      inputPlaceholder: ''
     };
   },
   computed: {},
@@ -64,9 +75,7 @@ export default {
             this.displayName(curr)
               .toLowerCase()
               .includes(newVal.toLowerCase()) ||
-            this.displayName(curr)
-              .toLowerCase()
-              .includes(newVal.toLowerCase())
+            this.displayName(curr).toLowerCase().includes(newVal.toLowerCase())
           ) {
             return curr;
           }
@@ -75,7 +84,14 @@ export default {
         this.localOptions = [];
         this.options.forEach(curr => this.localOptions.push(curr));
       }
+    },
+    clearTimezone() {
+      this.inputPlaceholder = moment.tz.guess();
+      this.chosenValue = this.inputPlaceholder;
     }
+  },
+  mounted() {
+    this.inputPlaceholder = this.placeholder;
   },
   methods: {
     dropdownOpen() {

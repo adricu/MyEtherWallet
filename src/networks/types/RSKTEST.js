@@ -1,5 +1,5 @@
-import tokens from '@/tokens/tokens-rsk-test.json';
-import contracts from '@/contracts/contract-abi-rsk-test.json';
+import tokens from '@/_generated/tokens/tokens-rsk-test.json';
+import contracts from '@/_generated/contracts/contract-abi-rsk-test.json';
 import rsk from '@/assets/images/networks/rsk.svg';
 
 export default {
@@ -11,5 +11,6 @@ export default {
   chainID: 31,
   tokens: tokens,
   contracts: contracts,
-  icon: rsk
+  icon: rsk,
+  currencyName: 'tRBTC'
 };

@@ -2,7 +2,13 @@
   <div>
     <div>
       <div class="page-container">
-        <title-text-contents :options="titleAndTextContents" />
+        <page-title
+          :options="{
+            title: $t('team.title'),
+            boldSubTitle: '',
+            textContent: [$t('team.desc')]
+          }"
+        />
 
         <div class="team-info">
           <div v-for="member in members" :key="member.name" class="member">
@@ -10,7 +16,6 @@
             <div class="text">
               <h4>{{ member.name }}</h4>
               <h6>{{ member.position }}</h6>
-              <h6>{{ member.otherInfo }}</h6>
             </div>
           </div>
         </div>
@@ -20,7 +25,7 @@
 </template>
 
 <script>
-import TitleTextContentsLayout from '../InformationPages/Components/TitleTextContentsLayout';
+import PageTitleComponent from '@/components/PageTitleComponent';
 
 import kosala from '@/assets/images/team/Kosala.jpg';
 import brian from '@/assets/images/team/Brian.jpg';
@@ -30,24 +35,20 @@ import richie from '@/assets/images/team/Richie.jpg';
 import brittany from '@/assets/images/team/Brittany.jpg';
 import yel from '@/assets/images/team/Gamaliel.jpg';
 import steve from '@/assets/images/team/Steve.jpg';
+import gage from '@/assets/images/team/Gage.jpg';
 import jack from '@/assets/images/team/Jack.jpg';
 import david from '@/assets/images/team/David.jpg';
-import samantha from '@/assets/images/team/Samantha.jpg';
 import alex from '@/assets/images/team/Alex.jpg';
 import misha from '@/assets/images/team/Misha.jpg';
 import katya from '@/assets/images/team/Katya.jpg';
+import semaja from '@/assets/images/team/Semaja.jpg';
 
 export default {
   components: {
-    'title-text-contents': TitleTextContentsLayout
+    'page-title': PageTitleComponent
   },
   data() {
     return {
-      titleAndTextContents: {
-        title: this.$t('team.title'),
-        boldSubTitle: '',
-        textContent: [this.$t('team.desc')]
-      },
       members: [
         {
           name: 'Kosala',
@@ -60,47 +61,9 @@ export default {
           img: brian
         },
         {
-          name: 'Olchik',
+          name: 'Olga',
           position: 'VP',
           img: olchik
-        },
-        {
-          name: 'Stephen',
-          position: 'Customer Support',
-          otherInfo: '#MEWForce',
-          img: stephen
-        },
-        {
-          name: 'Duke & Richie Wolf',
-          position: 'Blockchain Specialist',
-          otherInfo: '#MEWForce',
-          img: richie
-        },
-        {
-          name: 'Brittany',
-          position: 'Blockchain Specialist',
-          otherInfo: '#MEWForce',
-          img: brittany
-        },
-        {
-          name: 'Yel',
-          position: 'Full-Stack Developer',
-          img: yel
-        },
-        {
-          name: 'Steve',
-          position: 'Full-Stack Developer',
-          img: steve
-        },
-        {
-          name: 'Jack',
-          position: 'UI/UX Designer',
-          img: jack
-        },
-        {
-          name: 'David',
-          position: 'Front-End Developer',
-          img: david
         },
         {
           name: 'Alex',
@@ -113,14 +76,54 @@ export default {
           img: misha
         },
         {
+          name: 'Yel',
+          position: 'Full-Stack Developer',
+          img: yel
+        },
+        {
+          name: 'Steve',
+          position: 'Full-Stack Developer',
+          img: steve
+        },
+        {
+          name: 'Gage',
+          position: 'Full-Stack Developer',
+          img: gage
+        },
+        {
+          name: 'David',
+          position: 'Front-End Developer',
+          img: david
+        },
+        {
+          name: 'Jack',
+          position: 'Head of UI/UX Design',
+          img: jack
+        },
+        {
+          name: 'Stephen',
+          position: 'Educational Project Lead',
+          img: stephen
+        },
+        {
+          name: 'Brittany',
+          position: 'Operations Coordinator',
+          img: brittany
+        },
+        {
+          name: 'Duke & Wolf',
+          position: 'Blockchain Community Specialist',
+          img: richie
+        },
+        {
+          name: 'Semaja',
+          position: 'Blockchain Community Specialist',
+          img: semaja
+        },
+        {
           name: 'Katya',
           position: 'Community Advocate',
           img: katya
-        },
-        {
-          name: 'Samantha',
-          position: 'Media & Communication Officer',
-          img: samantha
         }
       ]
     };

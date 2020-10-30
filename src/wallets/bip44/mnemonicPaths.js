@@ -21,12 +21,24 @@ import {
   mixBlockchain,
   iolite,
   rskMainnet,
-  rskTestnet
+  rskTestnet,
+  thundercore,
+  solidum,
+  metadium,
+  dexon,
+  lightstreamsNetwork,
+  mintmeComCoin,
+  ethercore,
+  ledgerEthereum
 } from './paths';
+const renamedLedger = Object.assign({}, ledgerEthereum);
+renamedLedger.label = 'Ledger';
+
 export default [
   ethereum,
   ethereumClassic,
   ropsten,
+  renamedLedger,
   singularDTV,
   expanse,
   ubiq,
@@ -46,5 +58,12 @@ export default [
   mixBlockchain,
   iolite,
   rskMainnet,
-  rskTestnet
+  rskTestnet,
+  thundercore,
+  solidum,
+  metadium,
+  dexon,
+  lightstreamsNetwork,
+  mintmeComCoin,
+  ethercore
 ];

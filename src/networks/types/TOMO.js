@@ -1,15 +1,16 @@
-import tokens from '@/tokens/tokens-tomo.json';
-import contracts from '@/contracts/contract-abi-tomo.json';
+import tokens from '@/_generated/tokens/tokens-tomo.json';
+import contracts from '@/_generated/contracts/contract-abi-tomo.json';
 import tomo from '@/assets/images/networks/tomo.svg';
 
 export default {
   name: 'TOMO',
-  name_long: 'Tomo Coin',
+  name_long: 'TomoChain',
   homePage: 'https://tomochain.com/',
-  blockExplorerTX: 'https://explorer.tomocoin.io/#/tx/[[txHash]]',
-  blockExplorerAddr: 'https://explorer.tomocoin.io/#/address/[[address]]',
+  blockExplorerTX: 'https://scan.tomochain.com/txs/[[txHash]]',
+  blockExplorerAddr: 'https://scan.tomochain.com/address/[[address]]',
   chainID: 88,
   tokens: tokens,
   contracts: contracts,
-  icon: tomo
+  icon: tomo,
+  currencyName: 'TOMO'
 };

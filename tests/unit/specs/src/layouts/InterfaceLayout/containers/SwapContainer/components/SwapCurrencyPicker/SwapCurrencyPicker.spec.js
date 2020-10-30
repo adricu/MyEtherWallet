@@ -22,6 +22,11 @@ describe('SwapCurrencyPicker.vue', () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
+
   it('should render correct search data', () => {
     const search = 'search';
     wrapper.setData({ search });
@@ -32,17 +37,11 @@ describe('SwapCurrencyPicker.vue', () => {
 
   it('should render correct open data', () => {
     expect(
-      wrapper
-        .find('.dropdown-item-container')
-        .classes()
-        .indexOf('hide')
+      wrapper.find('.dropdown-item-container').classes().indexOf('hide')
     ).toBeGreaterThan(-1);
     wrapper.setData({ open: true });
     expect(
-      wrapper
-        .find('.dropdown-container')
-        .classes()
-        .indexOf('open')
+      wrapper.find('.dropdown-container').classes().indexOf('open')
     ).toBeGreaterThan(-1);
   });
 
@@ -60,16 +59,6 @@ describe('SwapCurrencyPicker.vue', () => {
         .classes()
         .indexOf('dropdown-text-container')
     ).toBe(-1);
-  });
-
-  it('should render correct selectedCurrency data', () => {
-    const dropDownContainer = wrapper.vm.$el.querySelector(
-      '.dropdown-container'
-    );
-    // expect(dropDownContainer.querySelector('span').textContent.trim()).toEqual("- " + wrapper.vm.$data.selectedCurrency.name);
-    expect(dropDownContainer.querySelectorAll('p')[1].textContent).toBe(
-      wrapper.vm.$data.selectedCurrency.name
-    );
   });
 
   it('should render correct fromSource data', () => {

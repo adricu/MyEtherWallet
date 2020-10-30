@@ -4,13 +4,17 @@ const configs = require('./configs');
 const tokenList = require('./lists/tokens.json');
 const contractList = require('./lists/contracts.json');
 
+if (!fs.existsSync(configs.GENERATED_FOLDER_PATH)) {
+  fs.mkdirSync(configs.GENERATED_FOLDER_PATH);
+}
+
 const fetchTokens = async () => {
   try {
     if (!fs.existsSync(configs.TOKENS_PATH)) {
       fs.mkdirSync(configs.TOKENS_PATH);
     }
     const tokenFileURL =
-      'https://raw.githubusercontent.com/MyEtherWallet/ethereum-lists/master/dist/tokens/';
+      'https://cdn.jsdelivr.net/gh/MyEtherWallet/ethereum-lists@master/dist/tokens/';
     if (tokenList !== undefined && tokenList.length > 0) {
       for (let i = 0; i < tokenList.length; i++) {
         const tokenFile = tokenList[i];
@@ -20,6 +24,7 @@ const fetchTokens = async () => {
           .then(res => res.json())
           .catch(err => console.log(err));
         if (tokensCollection !== undefined) {
+          console.log('Writing tokens for the network: ' + tokenFile.name);
           fs.writeFileSync(
             `${configs.TOKENS_PATH}/tokens-${tokenFile.name}.json`,
             JSON.stringify(tokensCollection)
@@ -32,14 +37,14 @@ const fetchTokens = async () => {
   }
 };
 
-const fetchDarkList = async () => {
+const fetchAddressDarkList = async () => {
   try {
-    if (!fs.existsSync(configs.DARKLIST_PATH)) {
-      fs.mkdirSync(configs.DARKLIST_PATH);
+    if (!fs.existsSync(configs.ADDRESS_DARKLIST_PATH)) {
+      fs.mkdirSync(configs.ADDRESS_DARKLIST_PATH);
     }
 
     const darkList = await fetch(
-      'https://raw.githubusercontent.com/MyEtherWallet/ethereum-lists/master/src/addresses/addresses-darklist.json'
+      'https://cdn.jsdelivr.net/gh/MyEtherWallet/ethereum-lists@master/src/addresses/addresses-darklist.json'
     )
       .then(res => res.json())
       .catch(console.log);
@@ -47,12 +52,115 @@ const fetchDarkList = async () => {
       data: darkList,
       timestamp: Date.now()
     };
+    console.log('Writing address darklist');
     fs.writeFileSync(
-      `${configs.DARKLIST_PATH}/address-darklist.json`,
+      `${configs.ADDRESS_DARKLIST_PATH}/address-darklist.json`,
       JSON.stringify(jsonToStore)
     );
   } catch (e) {
-    console.log(e); // Not captured by sentry
+    console.error(e); // Not captured by sentry
+  }
+};
+
+const fetchUrlDarklist = async () => {
+  const sources = [
+    {
+      repo:
+        'https://raw.githubusercontent.com/409H/EtherAddressLookup/master/blacklists/domains.json',
+      identifier: 'eal'
+    },
+    {
+      repo:
+        'https://raw.githubusercontent.com/phishfort/phishfort-lists/master/blacklists/domains.json',
+      identifier: 'phishfort'
+    },
+    {
+      repo:
+        'https://raw.githubusercontent.com/MyEtherWallet/ethereum-lists/master/src/urls/urls-darklist.json',
+      identifier: 'mew'
+    }
+  ];
+  try {
+    const promises = [];
+    if (!fs.existsSync(configs.URL_DARKLIST_PATH)) {
+      fs.mkdirSync(configs.URL_DARKLIST_PATH);
+    }
+
+    for (let i = 0; i < sources.length; i++) {
+      console.log(`Writing url darklist from ${sources[i].identifier}`);
+      const fetchedProm = await fetch(sources[i].repo).then(res => res.json());
+      promises.push(fetchedProm);
+    }
+
+    await Promise.all(promises).then(values => {
+      values.forEach((res, idx) => {
+        if (sources[idx].identifier === 'mew') {
+          const newRes = res.map(item => {
+            return item.id;
+          });
+
+          fs.writeFileSync(
+            `${configs.URL_DARKLIST_PATH}/${sources[idx].identifier}-blacklisted-domains.json`,
+            JSON.stringify(newRes)
+          );
+        } else {
+          fs.writeFileSync(
+            `${configs.URL_DARKLIST_PATH}/${sources[idx].identifier}-blacklisted-domains.json`,
+            JSON.stringify(res)
+          );
+        }
+      });
+    });
+  } catch (e) {
+    console.error(e); // Not captured by sentry
+  }
+};
+
+const fetchUrlLightlist = async () => {
+  const sources = [
+    {
+      repo:
+        'https://raw.githubusercontent.com/409H/EtherAddressLookup/master/whitelists/domains.json',
+      identifier: 'eal'
+    },
+    {
+      repo:
+        'https://raw.githubusercontent.com/MyEtherWallet/ethereum-lists/master/src/urls/urls-lightlist.json',
+      identifier: 'mew'
+    }
+  ];
+  try {
+    const promises = [];
+    if (!fs.existsSync(configs.URL_LIGHTLIST_PATH)) {
+      fs.mkdirSync(configs.URL_LIGHTLIST_PATH);
+    }
+    for (let i = 0; i < sources.length; i++) {
+      console.log(`Writing url lightlist from ${sources[i].identifier}`);
+      const fetchedProm = await fetch(sources[i].repo).then(res => res.json());
+      promises.push(fetchedProm);
+    }
+
+    await Promise.all(promises).then(values => {
+      values.forEach((res, idx) => {
+        if (sources[idx].identifier === 'mew') {
+          const newRes = res.map(item => {
+            return item.id;
+          });
+
+          fs.writeFileSync(
+            `${configs.URL_LIGHTLIST_PATH}/${sources[idx].identifier}-whitelisted-domains.json`,
+            JSON.stringify(newRes)
+          );
+        } else {
+          fs.writeFileSync(
+            `${configs.URL_LIGHTLIST_PATH}/${sources[idx].identifier}-whitelisted-domains.json`,
+            JSON.stringify(res)
+          );
+        }
+      });
+    });
+  } catch (e) {
+    console.error(e); // Not captured by sentry
   }
 };
 
@@ -63,6 +171,7 @@ const fetchContracts = async () => {
     }
 
     const contractFileURL =
+      // 'https://cdn.jsdelivr.net/gh/MyEtherWallet/ethereum-lists@master/dist/contracts/';
       'https://raw.githubusercontent.com/MyEtherWallet/ethereum-lists/master/dist/contracts/';
     if (contractList !== undefined && contractList.length > 0) {
       for (let i = 0; i < contractList.length; i++) {
@@ -75,6 +184,7 @@ const fetchContracts = async () => {
           .then(res => res.json())
           .catch(err => console.log(err));
         if (contractsCollection !== undefined) {
+          console.log('Writing contract for the network: ' + contractFile.name);
           fs.writeFileSync(
             `${configs.CONTRACTS_PATH}/contract-abi-${contractFile.name}.json`,
             JSON.stringify(contractsCollection)
@@ -87,10 +197,34 @@ const fetchContracts = async () => {
   }
 };
 
+const fetchMasterFile = async () => {
+  try {
+    if (!fs.existsSync(configs.MASTER_FILE_PATH)) {
+      fs.mkdirSync(configs.MASTER_FILE_PATH);
+    }
+
+    const response = await fetch(
+      'https://raw.githubusercontent.com/MyEtherWallet/ethereum-lists/master/dist/master-file.json'
+    ).then(res => res.json());
+    console.log('Writing masterfile');
+    if (response !== undefined) {
+      fs.writeFileSync(
+        `${configs.MASTER_FILE_PATH}/master-file.json`,
+        JSON.stringify(response)
+      );
+    }
+  } catch (e) {
+    console.error(e); // Not captured by sentry
+  }
+};
+
 const run = async () => {
   await fetchTokens()
     .then(fetchContracts)
-    .then(fetchDarkList);
+    .then(fetchAddressDarkList)
+    .then(fetchUrlDarklist)
+    .then(fetchUrlLightlist)
+    .then(fetchMasterFile);
 };
 
 (async () => {

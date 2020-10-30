@@ -2,7 +2,7 @@
   <div class="address-container">
     <div class="currency-container">
       <div class="icon-matcher">
-        <img :src="iconFetcher" />
+        <img :src="iconFetcher" alt />
       </div>
       <p>
         <span class="currency-amt">
@@ -15,15 +15,25 @@
       </p>
     </div>
     <div class="identicon-container">
-      <p>{{ direction | capitalize }} Address</p>
+      <p v-if="direction === 'to'">{{ $t('sendTx.to-addr') }}</p>
+      <p v-else>{{ $t('sendTx.from-addr') }}</p>
     </div>
-    <div class="address">{{ checksumAddress }}</div>
+    <div class="address" @click="doubleCheckLink(checksumAddress)">
+      {{ checksumAddress }}
+    </div>
+    <div v-if="tokenSymbol !== '' && direction === 'to'">
+      <p>{{ $t('sendTx.via-contract') }}</p>
+      <div class="address" @click="doubleCheckLink(tokenChecksumAddress)">
+        {{ tokenChecksumAddress }}
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { isAddress, toChecksumAddress } from '@/helpers/addressUtils';
 import web3 from 'web3';
+import { mapState } from 'vuex';
 export default {
   props: {
     address: {
@@ -60,6 +70,7 @@ export default {
     }
   },
   computed: {
+    ...mapState('main', ['network']),
     iconFetcher() {
       let icon;
       try {
@@ -74,8 +85,12 @@ export default {
       return this.tokenSymbol.toLowerCase();
     },
     checksumAddress() {
-      if (isAddress(this.tokenTransferTo))
-        return toChecksumAddress(this.tokenTransferTo);
+      if (isAddress(this.tokenTransferTo.toLowerCase()))
+        return toChecksumAddress(this.tokenTransferTo.toLowerCase());
+      if (isAddress(this.address)) return toChecksumAddress(this.address);
+      return '';
+    },
+    tokenChecksumAddress() {
       if (isAddress(this.address)) return toChecksumAddress(this.address);
       return '';
     }
@@ -83,6 +98,13 @@ export default {
   methods: {
     converter(num) {
       return web3.utils.fromWei(num.toString(), 'ether');
+    },
+    doubleCheckLink(address) {
+      // eslint-disable-next-line
+      window.open(
+        this.network.type.blockExplorerAddr.replace('[[address]]', address),
+        '_blank'
+      );
     }
   }
 };

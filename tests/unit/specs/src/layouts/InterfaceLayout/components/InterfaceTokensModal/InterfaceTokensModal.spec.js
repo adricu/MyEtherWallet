@@ -40,18 +40,23 @@ describe('InterfaceTokensModal.vue', () => {
     });
   });
 
+  afterEach(() => {
+    wrapper.destroy();
+    wrapper = null;
+  });
+
   it('should render correct tokenAddress', () => {
     const inputElements = wrapper.vm.$el.querySelectorAll(
       '.tokens-modal-body input'
     );
-    expect(inputElements[0].value).toEqual(tokenAddress);
+    expect(inputElements[0].value).toEqual(tokenAddress.toLowerCase());
   });
 
   it('should render correct tokenSymbol', () => {
     const inputElements = wrapper.vm.$el.querySelectorAll(
       '.tokens-modal-body input'
     );
-    expect(inputElements[1].value).toEqual(tokenSymbol);
+    expect(inputElements[1].value).toEqual(wrapper.vm.$data.tokenSymbol);
   });
 
   it('should render correct tokenDecimal', () => {

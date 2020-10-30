@@ -1,5 +1,5 @@
-import tokens from '@/tokens/tokens-iolite.json';
-import contracts from '@/contracts/contract-abi-iolite.json';
+import tokens from '@/_generated/tokens/tokens-iolite.json';
+import contracts from '@/_generated/contracts/contract-abi-iolite.json';
 import iolite from '@/assets/images/networks/iolite.svg';
 
 export default {
@@ -11,5 +11,6 @@ export default {
   chainID: 18289463,
   tokens: tokens,
   contracts: contracts,
-  icon: iolite
+  icon: iolite,
+  currencyName: 'ILT'
 };
